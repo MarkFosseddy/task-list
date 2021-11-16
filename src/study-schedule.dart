@@ -42,10 +42,11 @@ void main() {
             EmptyLine();
         }
 
+        Text(">> ");
+
         // update
         message = "";
 
-        Text(">> ");
         cmd = stdin.readLineSync() ?? "";
         cmd = cmd.trim().toLowerCase();
         if (cmd.isEmpty) continue;
