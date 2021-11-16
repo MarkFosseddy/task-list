@@ -4,19 +4,40 @@ void main() {
     bool exit = false;
     String cmd = "";
     String message = "";
-    var schedule = Schedule();
+
+    var morning = Schedule([ScheduleItem("Hello, World!", true)]);
+    var afternoon = Schedule([ScheduleItem("How Are You", false)]);
+    var evening = Schedule([ScheduleItem("This is Me", false)]);
 
     while (!exit) {
         // draw
-        clearScreen();
-        print("┏━━ Study Schedule ━━━");
-        print("");
-        schedule.draw();
-        print("");
-        print("");
+        ClearScreen();
+
+        Text("┏━━ Study Schedule ━━━");
+        NewLine();
+
+        Text("  Morning:");
+        ListView(morning.items, (item) {
+            Text("    [${item.completed ? "X" : " "}] ${item.text}");
+        });
+        NewLine();
+
+        Text("  Afternoon:");
+        ListView(afternoon.items, (item) {
+            Text("    [${item.completed ? "X" : " "}] ${item.text}");
+        });
+        NewLine();
+
+        Text("  Evening:");
+        ListView(evening.items, (item) {
+            Text("    [${item.completed ? "X" : " "}] ${item.text}");
+        });
+
+        NewLine();
+        NewLine();
 
         if (message.isNotEmpty) {
-            print(message);
+            Text(message);
         }
 
         // update
@@ -32,7 +53,7 @@ void main() {
 
             case "q":
                 exit = true;
-                clearScreen();
+                ClearScreen();
                 break;
 
             default: message = "Unknown command: `$cmd`";
@@ -40,34 +61,34 @@ void main() {
     }
 }
 
+class Text {
+    Text(String text) {
+        print(text);
+    }
+}
+
+class NewLine {
+    NewLine() {
+        Text("");
+    }
+}
+
+class ClearScreen {
+    ClearScreen() {
+        print(Process.runSync("clear", []).stdout);
+    }
+}
+
+class ListView {
+    ListView(List<dynamic> data, Function(dynamic v) builder) {
+        data.forEach(builder);
+    }
+}
+
 class Schedule {
-    List<ScheduleItem> morning = [ScheduleItem("Hello, World!", true)];
-    List<ScheduleItem> afternoon = [ScheduleItem("How Are You", false)];
-    List<ScheduleItem> evening = [ScheduleItem("This is Me", false)];
+    List<ScheduleItem> items;
 
-    void draw() {
-        if (this.morning.isNotEmpty) {
-            drawLabel("Morning", this.morning);
-        }
-
-        if (this.afternoon.isNotEmpty) {
-            drawLabel("Afternoon", this.afternoon);
-        }
-
-        if (this.evening.isNotEmpty) {
-            drawLabel("Evening", this.evening);
-        }
-    }
-
-    void drawLabel(String label, List<ScheduleItem> items) {
-        print("  $label:");
-
-        items.forEach((item) {
-            print("    [${item.completed ? "X" : " "}] ${item.text}");
-        });
-
-        print("");
-    }
+    Schedule(this.items);
 }
 
 class ScheduleItem {
@@ -75,8 +96,4 @@ class ScheduleItem {
     bool completed;
 
     ScheduleItem(this.text, this.completed);
-}
-
-void clearScreen() {
-    print(Process.runSync("clear", []).stdout);
 }
