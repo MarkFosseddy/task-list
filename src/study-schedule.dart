@@ -17,19 +17,24 @@ void main() {
         EmptyLine();
 
         Text("  Morning:\n");
-        ListView(morning.items, (item) {
+        ListView(morning.items.length, (int i) {
+            var item = morning.items.elementAt(i);
             Text("    [${item.completed ? "X" : " "}] ${item.text}\n");
         });
+
         EmptyLine();
 
         Text("  Afternoon:\n");
-        ListView(afternoon.items, (item) {
+        ListView(afternoon.items.length, (int i) {
+            var item = afternoon.items.elementAt(i);
             Text("    [${item.completed ? "X" : " "}] ${item.text}\n");
         });
+
         EmptyLine();
 
         Text("  Evening:\n");
-        ListView(evening.items, (item) {
+        ListView(evening.items.length, (int i) {
+            var item = evening.items.elementAt(i);
             Text("    [${item.completed ? "X" : " "}] ${item.text}\n");
         });
 
@@ -98,7 +103,9 @@ class ClearScreen {
 }
 
 class ListView {
-    ListView(List<dynamic> data, Function(dynamic v) builder) {
-        data.forEach(builder);
+    ListView(int listLen, Function(int i) builder) {
+        for (int i = 0; i < listLen; i++) {
+            builder(i);
+        }
     }
 }
