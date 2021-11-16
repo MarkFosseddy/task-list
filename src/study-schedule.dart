@@ -13,36 +13,39 @@ void main() {
         // draw
         ClearScreen();
 
-        Text("┏━━ Study Schedule ━━━");
-        NewLine();
+        Text("┏━━ Study Schedule ━━━\n");
+        EmptyLine();
 
-        Text("  Morning:");
+        Text("  Morning:\n");
         ListView(morning.items, (item) {
-            Text("    [${item.completed ? "X" : " "}] ${item.text}");
+            Text("    [${item.completed ? "X" : " "}] ${item.text}\n");
         });
-        NewLine();
+        EmptyLine();
 
-        Text("  Afternoon:");
+        Text("  Afternoon:\n");
         ListView(afternoon.items, (item) {
-            Text("    [${item.completed ? "X" : " "}] ${item.text}");
+            Text("    [${item.completed ? "X" : " "}] ${item.text}\n");
         });
-        NewLine();
+        EmptyLine();
 
-        Text("  Evening:");
+        Text("  Evening:\n");
         ListView(evening.items, (item) {
-            Text("    [${item.completed ? "X" : " "}] ${item.text}");
+            Text("    [${item.completed ? "X" : " "}] ${item.text}\n");
         });
 
-        NewLine();
-        NewLine();
+        EmptyLine();
+        EmptyLine();
 
         if (message.isNotEmpty) {
             Text(message);
+        } else {
+            EmptyLine();
         }
 
         // update
         message = "";
 
+        Text(">> ");
         cmd = stdin.readLineSync() ?? "";
         cmd = cmd.trim().toLowerCase();
         if (cmd.isEmpty) continue;
@@ -56,35 +59,12 @@ void main() {
                 ClearScreen();
                 break;
 
-            default: message = "Unknown command: `$cmd`";
+            default: message = "Unknown command: `$cmd`\n";
         }
     }
 }
 
-class Text {
-    Text(String text) {
-        print(text);
-    }
-}
-
-class NewLine {
-    NewLine() {
-        Text("");
-    }
-}
-
-class ClearScreen {
-    ClearScreen() {
-        print(Process.runSync("clear", []).stdout);
-    }
-}
-
-class ListView {
-    ListView(List<dynamic> data, Function(dynamic v) builder) {
-        data.forEach(builder);
-    }
-}
-
+// @TODO: load items from file
 class Schedule {
     List<ScheduleItem> items;
 
@@ -96,4 +76,28 @@ class ScheduleItem {
     bool completed;
 
     ScheduleItem(this.text, this.completed);
+}
+
+class Text {
+    Text(String text) {
+        stdout.write(text);
+    }
+}
+
+class EmptyLine {
+    EmptyLine() {
+        Text("\n");
+    }
+}
+
+class ClearScreen {
+    ClearScreen() {
+        stdout.write(Process.runSync("clear", []).stdout);
+    }
+}
+
+class ListView {
+    ListView(List<dynamic> data, Function(dynamic v) builder) {
+        data.forEach(builder);
+    }
 }
