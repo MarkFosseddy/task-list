@@ -6,12 +6,14 @@ void main() {
 
 class Program {
     bool exit = false;
+    bool isDeleting = false;
     Command cmd = Command("");
     String message = "";
 
-    List<ScheduleItem> morning = [ScheduleItem(0, "Hello, World!", "")];
-    List<ScheduleItem> afternoon = [ScheduleItem(0, "How Are You", "Optional description text")];
-    List<ScheduleItem> evening = [ScheduleItem(0, "This is Me", "")];
+    List<ScheduleItem> list = [
+        ScheduleItem(331, "Hello, World!", "How are you?"),
+        ScheduleItem(201, "Second Title", "")
+    ];
 
     void run() {
         while (!exit) {
@@ -26,51 +28,27 @@ class Program {
         UI.Text("┏━━ Study Schedule ━━━\n");
         UI.EmptyLine();
 
-        UI.Text("  Morning:\n");
-        UI.ListView(morning.length, (int i) {
-            var item = morning.elementAt(i);
-            UI.Text("    ${item.title}\n");
-            if (item.desc.isNotEmpty) {
-                UI.Text("      ${item.desc}\n");
-                UI.EmptyLine();
-            } else {
-                UI.EmptyLine();
-            }
-        });
+        if (list.isNotEmpty) {
+            UI.Text("  List:\n");
+            UI.ListView(list.length, (int i) {
+                var item = list.elementAt(i);
+
+                if (isDeleting) {
+                    UI.Text("    [${i + 1}] ${item.title}\n");
+                } else {
+                    UI.Text("    ${item.title}\n");
+                }
+
+                if (item.desc.isNotEmpty) {
+                    UI.Text("      ${item.desc}\n");
+                    UI.EmptyLine();
+                } else {
+                    UI.EmptyLine();
+                }
+            });
+        }
 
         UI.EmptyLine();
-
-        UI.Text("  Afternoon:\n");
-        UI.ListView(afternoon.length, (int i) {
-            var item = afternoon.elementAt(i);
-            UI.Text("    ${item.title}\n");
-            if (item.desc.isNotEmpty) {
-                UI.Text("      ${item.desc}\n");
-                UI.EmptyLine();
-            } else {
-                UI.EmptyLine();
-            }
-        });
-
-        UI.EmptyLine();
-
-        UI.Text("  Evening:\n");
-        UI.ListView(evening.length, (int i) {
-            var item = evening.elementAt(i);
-            UI.Text("    ${item.title}\n");
-            if (item.desc.isNotEmpty) {
-                UI.Text("      ${item.desc}\n");
-                UI.EmptyLine();
-            } else {
-                UI.EmptyLine();
-            }
-        });
-
-        UI.EmptyLine();
-        UI.EmptyLine();
-
-        UI.Text("cmd-name: ${cmd.name}\n");
-        UI.Text("cmd-args: ${cmd.args}\n");
         UI.EmptyLine();
 
         if (message.isNotEmpty) {
@@ -89,28 +67,21 @@ class Program {
         if (cmd.name.isEmpty) return;
 
         switch (cmd.name) {
-            case "add": {
-                if (cmd.args.isEmpty) {
-                    message = "Not enough arguments for `add` command\n";
-                    break;
-                }
-
-                if (!["m", "a", "e"].contains(cmd.args.first)) {
-                    message = "Unknown argument `${cmd.args.first}` for `add` command\n";
-                    break;
-                }
-
-                String title = "";
-                String desc = "";
-
-                stdout.write("Title: ");
-                title = stdin.readLineSync() ?? "";
+            case "add":
+            case "ad":
+            case "a": {
+                draw();
+                stdout.write("Title (empty to cancel): ");
+                var title = stdin.readLineSync() ?? "";
                 title = title.trim();
 
-                if (title.isEmpty) break;
+                if (title.isEmpty) {
+                    message = "Cancelled\n";
+                    break;
+                }
 
                 stdout.write("Description (optional):\n");
-                desc = stdin.readLineSync() ?? "";
+                var desc = stdin.readLineSync() ?? "";
                 desc = desc.trim();
 
                 var item = ScheduleItem(
@@ -119,19 +90,50 @@ class Program {
                     desc
                 );
 
-                switch (cmd.args.first) {
-                    case "m":
-                        morning.add(item);
-                        break;
+                list.add(item);
+                message = "New item was successfully added\n";
+            } break;
 
-                    case "a":
-                        afternoon.add(item);
-                        break;
-
-                    case "e":
-                        evening.add(item);
-                        break;
+            case "delete":
+            case "del":
+            case "d": {
+                if (list.isEmpty) {
+                    message = "The list is empty. You can add items using `add` command\n";
+                    break;
                 }
+
+                isDeleting = true;
+                String input = "";
+                int? index = null;
+
+                while (index == null) {
+                    draw();
+                    stdout.write("Select item to delete (empty to cancel): ");
+
+                    input = stdin.readLineSync() ?? "";
+                    input = input.trim().toLowerCase();
+                    if (input.isEmpty) break;
+
+                    index = int.tryParse(input);
+                    if (index == null) {
+                        message = "Invalid input: `$input`\n";
+                    } else if (index > list.length) {
+                        message = "Item `[$index]` is not valid\n";
+                        index = null;
+                    }
+                }
+
+                if (input.isEmpty) {
+                    isDeleting = false;
+                    message = "Canceled\n";
+                    break;
+                }
+
+                index = index! - 1;
+                list.removeAt(index);
+
+                isDeleting = false;
+                message = "Item successfully deleted\n";
             } break;
 
             case "q":
@@ -155,14 +157,12 @@ class Command {
 
         if (cmd.isEmpty) return;
 
-        List<String> parts = cmd.split(" ")
+        args = cmd.split(" ")
             .where((x) => x.isNotEmpty)
             .toList();
 
-        this.name = parts.first;
-
-        parts.removeAt(0);
-        this.args = parts;
+        name = args.first;
+        args.removeAt(0);
     }
 }
 
