@@ -31,7 +31,7 @@ func main() {
         }
 
         switch cmd {
-        case "add","ad","a":
+        case "add", "ad", "a":
             message = "TODO: Add new Item"
 
         case "delete", "del", "d":
