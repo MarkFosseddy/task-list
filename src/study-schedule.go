@@ -4,6 +4,7 @@ import (
     "fmt"
     "os/exec"
     "os"
+    "strings"
 )
 
 func main() {
@@ -29,6 +30,7 @@ func main() {
         if len(cmd) == 0 {
             continue
         }
+        cmd = strings.ToLower(cmd)
 
         switch cmd {
         case "add", "ad", "a":
