@@ -7,6 +7,12 @@ import (
     "strings"
 )
 
+type Task struct {
+    id int
+    title string
+    desc string
+}
+
 var exit bool = false
 var message string = ""
 var tasks []Task = []Task{
@@ -19,12 +25,6 @@ func main() {
         draw()
         update()
     }
-}
-
-type Task struct {
-    id int
-    title string
-    desc string
 }
 
 func update() {
