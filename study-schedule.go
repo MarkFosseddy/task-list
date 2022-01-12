@@ -7,6 +7,7 @@ import (
     "strings"
     "time"
     "bufio"
+    "strconv"
 )
 
 type Task struct {
@@ -53,8 +54,52 @@ func update() {
         message = ""
     }
 
-    case "delete":
-        message = "TODO: Delete Item\n"
+    case "delete": {
+        if len(tasks) == 0 {
+            message = "Task list is empty\n"
+            break
+        }
+
+        isDeleting = true
+        message = "Enter task id to delete (empty to cancel):\n"
+        draw()
+
+        index := 0
+        tasksLen := len(tasks)
+        for {
+            scanner.Scan()
+            text := strings.Trim(scanner.Text(), " ")
+            if len(text) == 0 { break }
+
+            value, err := strconv.Atoi(strings.Trim(text, " "))
+            if err == nil && value > 0 && value <= tasksLen {
+                index = value
+                break
+            }
+
+            message = fmt.Sprintf(
+                "Invalid task id: `%v`. Try again (empty to cancel):\n",
+                text,
+            )
+            draw()
+        }
+
+        if index > 0 {
+            // we are drawing index + 1 in ui
+            index = index - 1
+
+            var filtered []Task
+            for i, t := range tasks {
+                if index == i { continue }
+                filtered = append(filtered, t)
+            }
+
+            tasks = filtered
+        }
+
+        isDeleting = false
+        message = ""
+    }
 
     case "q", "quit", "exit":
         exit = true
