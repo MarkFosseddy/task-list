@@ -5,6 +5,8 @@ import (
     "os/exec"
     "os"
     "strings"
+    "time"
+    "bufio"
 )
 
 type Task struct {
@@ -20,19 +22,35 @@ var tasks []Task = []Task{
     Task{id: 1, title: "Second Title", desc: ""},
 }
 
+var scanner *bufio.Scanner = bufio.NewScanner(os.Stdin)
+
 func update() {
     message = ""
 
-    cmd := ""
-    fmt.Scanln(&cmd)
-    if len(cmd) == 0 {
-        return
-    }
-    cmd = strings.ToLower(cmd)
+    scanner.Scan()
+    cmd := strings.ToLower(strings.Trim(scanner.Text(), " "))
+    if len(cmd) == 0 { return }
 
     switch cmd {
-    case "add":
-        message = "TODO: Add new Item\n"
+    case "add": {
+        message = "Enter task title (empty for cancel):\n"
+        draw()
+        scanner.Scan()
+        title := strings.Trim(scanner.Text(), " ")
+
+        if len(title) > 0 {
+            message = "Enter task description (optional):\n"
+            draw()
+            scanner.Scan()
+            desc := strings.Trim(scanner.Text(), " ")
+
+            id := time.Now().Nanosecond()
+            newTask := Task{id, title, desc}
+            tasks = append(tasks, newTask)
+        }
+
+        message = ""
+    }
 
     case "delete":
         message = "TODO: Delete Item\n"
