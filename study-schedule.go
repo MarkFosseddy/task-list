@@ -16,6 +16,7 @@ type Task struct {
 }
 
 var exit bool = false
+var isDeleting bool = false
 var message string = ""
 var tasks []Task = []Task{
     Task{id: 0, title: "Hello, World!", desc: "How are you?"},
@@ -74,7 +75,13 @@ func draw() {
         drawText("  List:\n")
         drawList(len(tasks), func (i int) {
             item := tasks[i]
-            drawText("    " + item.title + "\n")
+
+            if isDeleting {
+                drawText(fmt.Sprintf("    [%v] %v\n", i + 1, item.title))
+            } else {
+                drawText(fmt.Sprintf("    %v\n", item.title))
+            }
+
             if (len(item.desc) > 0) {
                 drawText("      " + item.desc + "\n")
             }
