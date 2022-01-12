@@ -20,13 +20,6 @@ var tasks []Task = []Task{
     Task{id: 1, title: "Second Title", desc: ""},
 }
 
-func main() {
-    for !exit {
-        draw()
-        update()
-    }
-}
-
 func update() {
     message = ""
 
@@ -38,10 +31,10 @@ func update() {
     cmd = strings.ToLower(cmd)
 
     switch cmd {
-    case "add", "ad", "a":
+    case "add":
         message = "TODO: Add new Item\n"
 
-    case "delete", "del", "d":
+    case "delete":
         message = "TODO: Delete Item\n"
 
     case "q", "quit", "exit":
@@ -98,5 +91,12 @@ func drawEmptyLine() {
 func drawList(listLen int, builder func(i int)) {
     for i := 0; i < listLen; i += 1 {
         builder(i)
+    }
+}
+
+func main() {
+    for !exit {
+        draw()
+        update()
     }
 }
