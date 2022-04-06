@@ -7,21 +7,26 @@ import (
     "strings"
 )
 
+type State struct {
+    message string
+    tasks []Task
+}
+
 type Task struct {
     id int
     title string
     description string
 }
 
-func draw(tasks []Task, message string) {
+func draw(s *State) {
     fmt.Print("\033c")
 
     fmt.Println("Task List")
-    fmt.Println(tasks)
+    fmt.Println(s.tasks)
     fmt.Println()
 
-    if len(message) > 0 {
-        fmt.Println(message)
+    if len(s.message) > 0 {
+        fmt.Println(s.message)
     } else {
         fmt.Println()
     }
@@ -30,17 +35,18 @@ func draw(tasks []Task, message string) {
 }
 
 func main() {
+    state := &State{}
+    state.message = ""
+    state.tasks = []Task{}
+
     id := 1
     exit := false
-    message := ""
-    tasks := []Task{}
 
     input := bufio.NewScanner(os.Stdin)
 
     for !exit {
-        message = ""
-
-        draw(tasks, message)
+        state.message = ""
+        draw(state)
 
         input.Scan()
         cmd := strings.Trim(input.Text(), " ")
@@ -51,15 +57,15 @@ func main() {
             exit = true
 
         case "add": {
-            message = "Enter title (empty to cancel):"
-            draw(tasks, message)
+            state.message = "Enter title (empty to cancel):"
+            draw(state)
 
             input.Scan()
             title := strings.Trim(input.Text(), " ")
             if len(title) == 0 { continue }
 
-            message = "Enter description (optional):"
-            draw(tasks, message)
+            state.message = "Enter description (optional):"
+            draw(state)
 
             input.Scan()
             desc := strings.Trim(input.Text(), " ")
@@ -69,13 +75,13 @@ func main() {
             t.title = title
             t.description = desc
 
-            tasks = append(tasks, t)
+            state.tasks = append(state.tasks, t)
 
             id += 1
         }
 
         default:
-            message = fmt.Sprintf("Unknown command `%s`", cmd)
+            state.message = fmt.Sprintf("Unknown command `%s`", cmd)
         }
     }
 }
