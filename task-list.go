@@ -7,7 +7,20 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
+
+type cmdInput struct {
+	s *bufio.Scanner
+}
+
+func (i *cmdInput) scan() bool {
+	return i.s.Scan()
+}
+
+func (i *cmdInput) text() string {
+	return strings.TrimSpace(i.s.Text())
+}
 
 type task struct {
 	id    string
@@ -46,13 +59,13 @@ func draw() {
 
 func main() {
 	exit := false
-	input := bufio.NewScanner(os.Stdin)
+	input := cmdInput{bufio.NewScanner(os.Stdin)}
 
 	for !exit {
 		draw()
 
-		input.Scan()
-		cmd := strings.Trim(input.Text(), " ")
+		input.scan()
+		cmd := input.text()
 		if len(cmd) == 0 {
 			continue
 		}
@@ -61,19 +74,20 @@ func main() {
 		case "add":
 			message = "Enter title(empty to cancel):"
 			draw()
-			input.Scan()
-			title := strings.Trim(input.Text(), " ")
+			input.scan()
+			title := input.text()
 			if len(title) == 0 {
 				break
 			}
 
 			message = "Enter description(optional):"
 			draw()
-			input.Scan()
-			desc := strings.Trim(input.Text(), " ")
+			input.scan()
+			desc := input.text()
 
+			r := rand.New(rand.NewSource(time.Now().UnixNano()))
 			tasks = append(tasks, task{
-				id:    strconv.FormatUint(rand.Uint64(), 36),
+				id:    strconv.FormatUint(r.Uint64(), 36),
 				title: title,
 				desc:  desc,
 			})
