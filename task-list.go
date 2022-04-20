@@ -9,14 +9,14 @@ import (
 	"strings"
 )
 
-type Task struct {
+type task struct {
 	id    string
 	title string
 	desc  string
 }
 
 var message string = ""
-var tasks []Task = []Task{}
+var tasks []task = []task{}
 
 func draw() {
 	// @NOTE(art): clear screen
@@ -72,7 +72,7 @@ func main() {
 			input.Scan()
 			desc := strings.Trim(input.Text(), " ")
 
-			tasks = append(tasks, Task{
+			tasks = append(tasks, task{
 				id:    strconv.FormatUint(rand.Uint64(), 36),
 				title: title,
 				desc:  desc,
