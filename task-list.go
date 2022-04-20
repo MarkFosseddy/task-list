@@ -30,6 +30,7 @@ type task struct {
 
 var message string = ""
 var tasks []task = []task{}
+var deleting bool = false
 
 func draw() {
 	// @NOTE(art): clear screen
@@ -38,11 +39,18 @@ func draw() {
 	fmt.Println("Task List")
 	fmt.Println()
 
-	for _, t := range tasks {
-		fmt.Printf(
-			"  id: %v\n  title: %v\n  description: %v\n\n",
-			t.id, t.title, t.desc,
-		)
+	for i, t := range tasks {
+		if deleting {
+			fmt.Printf(
+				"  [%v] id: %v\n  title: %v\n  description: %v\n\n",
+				i+1, t.id, t.title, t.desc,
+			)
+		} else {
+			fmt.Printf(
+				"  id: %v\n  title: %v\n  description: %v\n\n",
+				t.id, t.title, t.desc,
+			)
+		}
 	}
 
 	if len(message) > 0 {
@@ -72,7 +80,7 @@ func main() {
 
 		switch cmd {
 		case "add":
-			message = "Enter title(empty to cancel):"
+			message = "Enter title (empty to cancel):"
 			draw()
 			input.scan()
 			title := input.text()
@@ -80,7 +88,7 @@ func main() {
 				break
 			}
 
-			message = "Enter description(optional):"
+			message = "Enter description (optional):"
 			draw()
 			input.scan()
 			desc := input.text()
@@ -91,6 +99,50 @@ func main() {
 				title: title,
 				desc:  desc,
 			})
+		case "delete":
+			if len(tasks) == 0 {
+				message = "You have no tasks. Use `add` command to create one"
+				break
+			}
+
+			deleting = true
+			id := -1
+			delmsg := "Choose task to delete (empty to cancel):"
+
+			for {
+				message = delmsg
+				draw()
+				input.scan()
+				text := input.text()
+				if len(text) == 0 {
+					break
+				}
+
+				val, err := strconv.Atoi(text)
+				if err != nil {
+					continue
+				}
+
+				if val < 1 || val > len(tasks) {
+					continue
+				}
+
+				// @NOTE(art): in ui we draw ids starting from 1
+				id = val - 1
+				break
+			}
+
+			if id != -1 {
+				var tmp []task
+				for i, t := range tasks {
+					if i != id {
+						tmp = append(tmp, t)
+					}
+				}
+				tasks = tmp
+			}
+
+			deleting = false
 		case "q":
 			exit = true
 
