@@ -3,32 +3,53 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 )
 
+type Task struct {
+	id    string
+	title string
+	desc  string
+}
+
+var message string = ""
+var tasks []Task = []Task{}
+
+func draw() {
+	// @NOTE(art): clear screen
+	fmt.Print("\033c")
+
+	fmt.Println("Task List")
+	fmt.Println()
+
+	for _, t := range tasks {
+		fmt.Printf(
+			"  id: %v\n  title: %v\n  description: %v\n\n",
+			t.id, t.title, t.desc,
+		)
+	}
+
+	if len(message) > 0 {
+		fmt.Println(message)
+	} else {
+		fmt.Println()
+	}
+
+	fmt.Print(">> ")
+	// @NOTE(art): kinda hacky to reset message here, but otherwise you have to
+	// do it in every command handler
+	message = ""
+}
+
 func main() {
 	exit := false
-	msg := ""
 	input := bufio.NewScanner(os.Stdin)
 
 	for !exit {
-		// draw
-		fmt.Print("\033c")
-
-		fmt.Println("Task List")
-		fmt.Println()
-
-		if len(msg) > 0 {
-			fmt.Println(msg)
-		} else {
-			fmt.Println()
-		}
-
-		fmt.Print(">> ")
-
-		// update
-		msg = ""
+		draw()
 
 		input.Scan()
 		cmd := strings.Trim(input.Text(), " ")
@@ -37,11 +58,30 @@ func main() {
 		}
 
 		switch cmd {
+		case "add":
+			message = "Enter title(empty to cancel):"
+			draw()
+			input.Scan()
+			title := strings.Trim(input.Text(), " ")
+			if len(title) == 0 {
+				break
+			}
+
+			message = "Enter description(optional):"
+			draw()
+			input.Scan()
+			desc := strings.Trim(input.Text(), " ")
+
+			tasks = append(tasks, Task{
+				id:    strconv.FormatUint(rand.Uint64(), 36),
+				title: title,
+				desc:  desc,
+			})
 		case "q":
 			exit = true
 
 		default:
-			msg = fmt.Sprintf("Unknown command `%s`", cmd)
+			message = fmt.Sprintf("Unknown command `%s`", cmd)
 		}
 	}
 }
