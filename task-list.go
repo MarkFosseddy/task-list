@@ -124,14 +124,13 @@ var store storage = storage{"/home/fosseddy/.task-list"}
 
 var app application = application{
 	input:    &cmdInput{bufio.NewScanner(os.Stdin)},
-	tasks:    []task{},
+	tasks:    store.read(),
 	message:  "",
 	editing:  false,
 	deleting: false,
 }
 
 func main() {
-	app.tasks = store.read()
 	exit := false
 
 	for !exit {
