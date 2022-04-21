@@ -3,11 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/rand"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type cmdInput struct {
@@ -23,7 +21,6 @@ func (i *cmdInput) text() string {
 }
 
 type task struct {
-	id    string
 	title string
 	desc  string
 }
@@ -42,14 +39,11 @@ func draw() {
 	for i, t := range tasks {
 		if deleting {
 			fmt.Printf(
-				"  [%v] id: %v\n  title: %v\n  description: %v\n\n",
-				i+1, t.id, t.title, t.desc,
+				"  [%v] title: %v\n  description: %v\n\n",
+				i+1, t.title, t.desc,
 			)
 		} else {
-			fmt.Printf(
-				"  id: %v\n  title: %v\n  description: %v\n\n",
-				t.id, t.title, t.desc,
-			)
+			fmt.Printf("  title: %v\n  description: %v\n\n", t.title, t.desc)
 		}
 	}
 
@@ -60,9 +54,6 @@ func draw() {
 	}
 
 	fmt.Print(">> ")
-	// @NOTE(art): kinda hacky to reset message here, but otherwise you have to
-	// do it in every command handler
-	message = ""
 }
 
 func main() {
@@ -72,6 +63,7 @@ func main() {
 	for !exit {
 		draw()
 
+		message = ""
 		input.scan()
 		cmd := input.text()
 		if len(cmd) == 0 {
@@ -82,35 +74,30 @@ func main() {
 		case "add":
 			message = "Enter title (empty to cancel):"
 			draw()
+
 			input.scan()
 			title := input.text()
-			if len(title) == 0 {
-				break
+
+			if len(title) > 0 {
+				message = "Enter description (optional):"
+				draw()
+				input.scan()
+				desc := input.text()
+				tasks = append(tasks, task{title, desc})
 			}
 
-			message = "Enter description (optional):"
-			draw()
-			input.scan()
-			desc := input.text()
-
-			r := rand.New(rand.NewSource(time.Now().UnixNano()))
-			tasks = append(tasks, task{
-				id:    strconv.FormatUint(r.Uint64(), 36),
-				title: title,
-				desc:  desc,
-			})
+			message = ""
 		case "delete":
 			if len(tasks) == 0 {
 				message = "You have no tasks. Use `add` command to create one"
 				break
 			}
 
+			message = "Choose task to delete (empty to cancel):"
 			deleting = true
 			id := -1
-			delmsg := "Choose task to delete (empty to cancel):"
 
 			for {
-				message = delmsg
 				draw()
 				input.scan()
 				text := input.text()
@@ -118,18 +105,13 @@ func main() {
 					break
 				}
 
-				val, err := strconv.Atoi(text)
-				if err != nil {
-					continue
+				if val, err := strconv.Atoi(text); err == nil {
+					if val >= 1 && val <= len(tasks) {
+						// @NOTE(art): in ui we draw ids starting from 1
+						id = val - 1
+						break
+					}
 				}
-
-				if val < 1 || val > len(tasks) {
-					continue
-				}
-
-				// @NOTE(art): in ui we draw ids starting from 1
-				id = val - 1
-				break
 			}
 
 			if id != -1 {
@@ -143,11 +125,11 @@ func main() {
 			}
 
 			deleting = false
+			message = ""
 		case "exit":
 			exit = true
-
 		case "help":
-			message = "Tasks:\n  add\n  delete\nhelp\nexit\n"
+			message = "add\ndelete\nhelp\nexit\n"
 		default:
 			message = fmt.Sprintf(
 				"Unknown command `%s`. Type `help` to see commands",
