@@ -96,12 +96,12 @@ func (app *application) draw() {
 		if app.deleting || app.editing {
 			fmt.Printf("  [%d] %s\n", i+1, t.title)
 			if t.desc != "" {
-				fmt.Printf("        %s\n", t.title)
+				fmt.Printf("        %s\n", t.desc)
 			}
 		} else {
 			fmt.Printf("  %s\n", t.title)
 			if t.desc != "" {
-				fmt.Printf("    %s\n", t.title)
+				fmt.Printf("    %s\n", t.desc)
 			}
 		}
 
@@ -263,7 +263,7 @@ func main() {
 		case "exit":
 			exit = true
 		case "help":
-			app.message = "add\ndelete\nedit\nhelp\nexit\n"
+			app.message = "add\ndelete\nedit\nhelp\nexit"
 		default:
 			app.message = fmt.Sprintf(
 				"Unknown command `%s`. Type `help` to see commands",
