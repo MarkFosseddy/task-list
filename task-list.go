@@ -87,23 +87,7 @@ func (s *storage) write(data []task) {
 	assert(err == nil, err)
 }
 
-func assert(cond bool, err error) {
-	if !cond {
-		log.Fatal(err)
-	}
-}
-
-var store storage = storage{"/home/fosseddy/.task-list"}
-
-var app application = application{
-	input:    &cmdInput{bufio.NewScanner(os.Stdin)},
-	tasks:    []task{},
-	message:  "",
-	editing:  false,
-	deleting: false,
-}
-
-func draw() {
+func (app *application) draw() {
 	// @NOTE(art): clear screen
 	fmt.Print("\033c")
 
@@ -121,13 +105,26 @@ func draw() {
 		}
 	}
 
-	if app.message != "" {
-		fmt.Println(app.message)
-	} else {
-		fmt.Println()
-	}
+	fmt.Println(app.message)
 
+	// @NOTE(art): cursor
 	fmt.Print(">> ")
+}
+
+func assert(cond bool, err error) {
+	if !cond {
+		log.Fatal(err)
+	}
+}
+
+var store storage = storage{"/home/fosseddy/.task-list"}
+
+var app application = application{
+	input:    &cmdInput{bufio.NewScanner(os.Stdin)},
+	tasks:    []task{},
+	message:  "",
+	editing:  false,
+	deleting: false,
 }
 
 func main() {
@@ -135,7 +132,7 @@ func main() {
 	exit := false
 
 	for !exit {
-		draw()
+		app.draw()
 
 		app.message = ""
 		app.input.scan()
@@ -147,19 +144,18 @@ func main() {
 		switch cmd {
 		case "add":
 			app.message = "Enter title (empty to cancel):"
-			draw()
+			app.draw()
 			app.input.scan()
 			title := app.input.text()
 
 			if title != "" {
 				app.message = "Enter description (optional):"
-				draw()
+				app.draw()
 				app.input.scan()
 				desc := app.input.text()
 				app.tasks = append(app.tasks, task{title, desc})
+				store.write(app.tasks)
 			}
-
-			store.write(app.tasks)
 
 			app.message = ""
 		case "delete":
@@ -173,7 +169,7 @@ func main() {
 			id := -1
 
 			for {
-				draw()
+				app.draw()
 				app.input.scan()
 				text := app.input.text()
 
@@ -214,7 +210,7 @@ func main() {
 			id := -1
 
 			for {
-				draw()
+				app.draw()
 				app.input.scan()
 				text := app.input.text()
 
@@ -233,12 +229,12 @@ func main() {
 
 			if id != -1 {
 				app.message = "Enter new title (empty to skip):"
-				draw()
+				app.draw()
 				app.input.scan()
 				title := app.input.text()
 
 				app.message = "Enter new description (empty to skip):"
-				draw()
+				app.draw()
 				app.input.scan()
 				desc := app.input.text()
 
