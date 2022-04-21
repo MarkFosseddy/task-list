@@ -28,6 +28,7 @@ type task struct {
 var message string = ""
 var tasks []task = []task{}
 var deleting bool = false
+var updating bool = false
 
 func draw() {
 	// @NOTE(art): clear screen
@@ -37,7 +38,7 @@ func draw() {
 	fmt.Println()
 
 	for i, t := range tasks {
-		if deleting {
+		if deleting || updating {
 			fmt.Printf(
 				"  [%v] title: %v\n  description: %v\n\n",
 				i+1, t.title, t.desc,
@@ -74,7 +75,6 @@ func main() {
 		case "add":
 			message = "Enter title (empty to cancel):"
 			draw()
-
 			input.scan()
 			title := input.text()
 
@@ -101,6 +101,7 @@ func main() {
 				draw()
 				input.scan()
 				text := input.text()
+
 				if len(text) == 0 {
 					break
 				}
@@ -126,10 +127,55 @@ func main() {
 
 			deleting = false
 			message = ""
+		case "update":
+			if len(tasks) == 0 {
+				message = "You have no tasks. Use `add` command to create one"
+				break
+			}
+
+			message = "Choose task to update (empty to cancel):"
+			updating = true
+			id := -1
+
+			for {
+				draw()
+				input.scan()
+				text := input.text()
+
+				if len(text) == 0 {
+					break
+				}
+
+				if val, err := strconv.Atoi(text); err == nil {
+					if val >= 1 && val <= len(tasks) {
+						// @NOTE(art): in ui we draw ids starting from 1
+						id = val - 1
+						break
+					}
+				}
+			}
+
+			if id != -1 {
+				message = "Enter new title (empty to cancel):"
+				draw()
+				input.scan()
+				title := input.text()
+
+				if len(title) > 0 {
+					message = "Enter description (optional):"
+					draw()
+					input.scan()
+					desc := input.text()
+					tasks[id] = task{title, desc}
+				}
+			}
+
+			updating = false
+			message = ""
 		case "exit":
 			exit = true
 		case "help":
-			message = "add\ndelete\nhelp\nexit\n"
+			message = "add\ndelete\nupdate\nhelp\nexit\n"
 		default:
 			message = fmt.Sprintf(
 				"Unknown command `%s`. Type `help` to see commands",
