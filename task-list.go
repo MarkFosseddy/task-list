@@ -143,11 +143,16 @@ func main() {
 			}
 
 			deleting = false
-		case "q":
+		case "exit":
 			exit = true
 
+		case "help":
+			message = "Tasks:\n  add\n  delete\nhelp\nexit\n"
 		default:
-			message = fmt.Sprintf("Unknown command `%s`", cmd)
+			message = fmt.Sprintf(
+				"Unknown command `%s`. Type `help` to see commands",
+				cmd,
+			)
 		}
 	}
 }
