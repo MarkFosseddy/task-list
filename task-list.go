@@ -156,17 +156,22 @@ func main() {
 			}
 
 			if id != -1 {
-				message = "Enter new title (empty to cancel):"
+				message = "Enter new title (empty to skip):"
 				draw()
 				input.scan()
 				title := input.text()
 
+				message = "Enter new description (empty to skip):"
+				draw()
+				input.scan()
+				desc := input.text()
+
 				if len(title) > 0 {
-					message = "Enter description (optional):"
-					draw()
-					input.scan()
-					desc := input.text()
-					tasks[id] = task{title, desc}
+					tasks[id].title = title
+				}
+
+				if len(desc) > 0 {
+					tasks[id].desc = desc
 				}
 			}
 
