@@ -52,7 +52,6 @@ func (s *storage) read() []task {
 	items := []task{}
 
 	if len(data) > 0 {
-		err := ""
 		for _, line := range strings.Split(data, "\n") {
 			if title, desc, found := strings.Cut(line, " <-$-> "); found {
 				if desc == "-$-" {
@@ -60,10 +59,9 @@ func (s *storage) read() []task {
 				}
 				items = append(items, task{title, desc})
 			} else {
-				err += fmt.Sprintf("Error parsing task: %s\n", line)
+				assert(false, errors.New("Error parsing task: "+line))
 			}
 		}
-		assert(err == "", errors.New(err))
 	}
 
 	return items
@@ -91,18 +89,23 @@ func (app *application) draw() {
 	// @NOTE(art): clear screen
 	fmt.Print("\033c")
 
-	fmt.Println("Task List")
+	fmt.Println("┏━━ Task List ━━━")
 	fmt.Println()
 
 	for i, t := range app.tasks {
 		if app.deleting || app.editing {
-			fmt.Printf(
-				"  [%v] title: %v\n  description: %v\n\n",
-				i+1, t.title, t.desc,
-			)
+			fmt.Printf("  [%d] %s\n", i+1, t.title)
+			if t.desc != "" {
+				fmt.Printf("        %s\n", t.title)
+			}
 		} else {
-			fmt.Printf("  title: %v\n  description: %v\n\n", t.title, t.desc)
+			fmt.Printf("  %s\n", t.title)
+			if t.desc != "" {
+				fmt.Printf("    %s\n", t.title)
+			}
 		}
+
+		fmt.Println()
 	}
 
 	fmt.Println(app.message)
