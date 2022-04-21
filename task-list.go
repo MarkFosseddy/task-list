@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -23,6 +25,63 @@ func (i *cmdInput) text() string {
 type task struct {
 	title string
 	desc  string
+}
+
+type storage struct {
+	file string
+}
+
+func (s *storage) read() []task {
+	fd, err := os.OpenFile(s.file, os.O_RDONLY|os.O_CREATE, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fd.Close()
+
+	bytes, err := io.ReadAll(fd)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	data := strings.TrimSpace(string(bytes))
+	items := []task{}
+
+	if len(data) > 0 {
+		for _, line := range strings.Split(data, "\n") {
+			if title, desc, found := strings.Cut(line, " <-$-> "); found {
+				if desc == "-$-" {
+					desc = ""
+				}
+				items = append(items, task{title, desc})
+			} else {
+				message += fmt.Sprintf("Error parsing task: %s\n", line)
+			}
+		}
+	}
+
+	return items
+}
+
+func (s *storage) write(data []task) {
+	fd, err := os.OpenFile(s.file, os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fd.Close()
+
+	buf := ""
+	for _, item := range data {
+		desc := item.desc
+		if len(desc) == 0 {
+			desc = "-$-"
+		}
+		buf += fmt.Sprintf("%s <-$-> %s\n", item.title, desc)
+	}
+
+	_, err = fd.WriteString(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 var message string = ""
@@ -58,6 +117,9 @@ func draw() {
 }
 
 func main() {
+	store := storage{"/home/fosseddy/.task-list"}
+	tasks = store.read()
+
 	exit := false
 	input := cmdInput{bufio.NewScanner(os.Stdin)}
 
@@ -85,6 +147,8 @@ func main() {
 				desc := input.text()
 				tasks = append(tasks, task{title, desc})
 			}
+
+			store.write(tasks)
 
 			message = ""
 		case "delete":
@@ -123,6 +187,7 @@ func main() {
 					}
 				}
 				tasks = tmp
+				store.write(tasks)
 			}
 
 			deleting = false
@@ -166,12 +231,20 @@ func main() {
 				input.scan()
 				desc := input.text()
 
+				changed := false
+
 				if len(title) > 0 {
 					tasks[id].title = title
+					changed = true
 				}
 
 				if len(desc) > 0 {
 					tasks[id].desc = desc
+					changed = true
+				}
+
+				if changed {
+					store.write(tasks)
 				}
 			}
 
